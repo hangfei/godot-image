@@ -1,52 +1,47 @@
-FROM ubuntu:22.04
+FROM python:3.11-slim
 
-# Avoid prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install required packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    supervisor \
     xvfb \
-    x11vnc \
-    fluxbox \
-    novnc \
-    wget \
-    unzip \
-    libxcursor1 \
-    libxinerama1 \
-    libgl1 \
-    libglu1-mesa \
-    libasound2 \
-    libpulse0 \
-    libudev1 \
-    libxi6 \
-    libxrandr2 \
-    mesa-utils \
-    && apt-get clean \
+    x11-utils \
+    xdotool \
+    scrot \
+    imagemagick \
+    python3-tk \
+    libsdl2-dev \
+    libsdl2-image-dev \
+    libsdl2-mixer-dev \
+    libsdl2-ttf-dev \
+    libfreetype6-dev \
+    libportmidi-dev \
+    libjpeg-dev \
+    python3-dev \
+    python3-numpy \
+    libsdl2-2.0-0 \
+    build-essential \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Create directory for Godot
-RUN mkdir -p /godot
+# Set up Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Download and install Godot Server version (headless) which is more compatible with containers
-RUN wget https://github.com/godotengine/godot/releases/download/4.2.1-stable/Godot_v4.2.1-stable_linux_server.64.zip -O /tmp/godot.zip \
-    && unzip /tmp/godot.zip -d /tmp \
-    && mv /tmp/Godot_v4.2.1-stable_linux_server.64 /godot/godot \
-    && chmod +x /godot/godot \
-    && rm /tmp/godot.zip
+# Set up working directory
+WORKDIR /app
 
-# Set up VNC password
-RUN mkdir -p /root/.vnc
-RUN x11vnc -storepasswd password /root/.vnc/passwd
+# Copy game files
+COPY game.py .
+COPY automation.py .
 
-# Copy supervisord configuration
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Set environment variables for display
+ENV DISPLAY=:99
 
-# Expose ports
-EXPOSE 6080 5900
+# Create script to start virtual display and run automation
+COPY start.sh .
+RUN chmod +x start.sh
 
-# Set environment variables for OpenGL
-ENV LIBGL_ALWAYS_SOFTWARE=1
+# Expose directory for screenshots
+VOLUME ["/app/screenshots"]
 
-# Start supervisord
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"] 
+# Default command
+CMD ["./start.sh"]
