@@ -83,6 +83,29 @@ class GameAutomation:
     def send_click_event(self, x, y):
         """Send mouse click event using xdotool"""
         try:
+            # Log detailed click information
+            print(f"🖱️  CLICK EVENT DETAILS:")
+            print(f"   📍 Screen Coordinates: ({x}, {y})")
+            
+            # Calculate tile grid coordinates for our GLB Asset Matching game
+            grid_info = self.get_tile_grid_info(x, y)
+            if grid_info:
+                print(f"   🎯 Tile Grid: {grid_info}")
+            
+            # Show window information
+            if self.window_id:
+                print(f"   🪟 Target Window ID: {self.window_id}")
+                # Get window title if available
+                try:
+                    result = subprocess.run(['xdotool', 'getwindowname', self.window_id],
+                                          capture_output=True, text=True, env={'DISPLAY': ':99'})
+                    if result.returncode == 0 and result.stdout.strip():
+                        print(f"   📝 Window Title: '{result.stdout.strip()}'")
+                except:
+                    pass
+            else:
+                print(f"   🪟 Target: Global (no specific window)")
+            
             # Focus the window first if we have window ID
             if self.window_id:
                 subprocess.run(['xdotool', 'windowfocus', self.window_id], 
@@ -90,16 +113,88 @@ class GameAutomation:
                 time.sleep(0.1)  # Small delay after focusing
             
             # Move mouse and click
+            print(f"   🎮 Moving mouse to ({x}, {y})...")
             subprocess.run(['xdotool', 'mousemove', str(x), str(y)], 
                          check=True, env={'DISPLAY': ':99'})
             time.sleep(0.1)  # Small delay
+            print(f"   👆 Executing left click...")
             subprocess.run(['xdotool', 'click', '1'], 
                          check=True, env={'DISPLAY': ':99'})
-            print(f"Clicked at ({x}, {y})")
+            print(f"   ✅ Click successful at ({x}, {y})")
             return True
         except subprocess.CalledProcessError as e:
-            print(f"Failed to click at ({x}, {y}): {e}")
+            print(f"   ❌ Failed to click at ({x}, {y}): {e}")
             return False
+    
+    def get_tile_grid_info(self, x, y):
+        """Calculate tile grid information for GLB Asset Matching game"""
+        # Game grid constants (matching game.py)
+        GRID_WIDTH = 8
+        GRID_HEIGHT = 6
+        TILE_SIZE = 80
+        WINDOW_WIDTH = 1024
+        WINDOW_HEIGHT = 768
+        GRID_OFFSET_X = (WINDOW_WIDTH - GRID_WIDTH * TILE_SIZE) // 2  # 192
+        GRID_OFFSET_Y = (WINDOW_HEIGHT - GRID_HEIGHT * TILE_SIZE) // 2  # 104
+        
+        # Check if click is within the game grid area
+        if (x >= GRID_OFFSET_X and x < GRID_OFFSET_X + GRID_WIDTH * TILE_SIZE and
+            y >= GRID_OFFSET_Y and y < GRID_OFFSET_Y + GRID_HEIGHT * TILE_SIZE):
+            
+            # Calculate grid coordinates
+            grid_x = (x - GRID_OFFSET_X) // TILE_SIZE
+            grid_y = (y - GRID_OFFSET_Y) // TILE_SIZE
+            
+            # Calculate tile center coordinates
+            tile_center_x = GRID_OFFSET_X + grid_x * TILE_SIZE + TILE_SIZE // 2
+            tile_center_y = GRID_OFFSET_Y + grid_y * TILE_SIZE + TILE_SIZE // 2
+            
+            # Calculate offset from tile center
+            offset_x = x - tile_center_x
+            offset_y = y - tile_center_y
+            
+            return f"Row {grid_y}, Col {grid_x} (center: {tile_center_x},{tile_center_y}, offset: {offset_x:+},{offset_y:+})"
+        else:
+            return f"Outside game grid (grid area: {GRID_OFFSET_X}-{GRID_OFFSET_X + GRID_WIDTH * TILE_SIZE}, {GRID_OFFSET_Y}-{GRID_OFFSET_Y + GRID_HEIGHT * TILE_SIZE})"
+    
+    def show_grid_layout(self):
+        """Display the tile grid layout for reference"""
+        # Game grid constants (matching game.py)
+        GRID_WIDTH = 8
+        GRID_HEIGHT = 6
+        TILE_SIZE = 80
+        WINDOW_WIDTH = 1024
+        WINDOW_HEIGHT = 768
+        GRID_OFFSET_X = (WINDOW_WIDTH - GRID_WIDTH * TILE_SIZE) // 2  # 192
+        GRID_OFFSET_Y = (WINDOW_HEIGHT - GRID_HEIGHT * TILE_SIZE) // 2  # 104
+        
+        print(f"\n🎮 GLB Asset Matching Game - Tile Grid Layout")
+        print(f"   Window Size: {WINDOW_WIDTH} x {WINDOW_HEIGHT}")
+        print(f"   Grid Size: {GRID_WIDTH} x {GRID_HEIGHT} tiles")
+        print(f"   Tile Size: {TILE_SIZE} x {TILE_SIZE} pixels")
+        print(f"   Grid Offset: ({GRID_OFFSET_X}, {GRID_OFFSET_Y})")
+        print(f"   Grid Area: {GRID_OFFSET_X}-{GRID_OFFSET_X + GRID_WIDTH * TILE_SIZE} x {GRID_OFFSET_Y}-{GRID_OFFSET_Y + GRID_HEIGHT * TILE_SIZE}")
+        print()
+        
+        print("📍 Tile Center Coordinates:")
+        print("   ", end="")
+        for col in range(GRID_WIDTH):
+            print(f"Col{col:2}", end="     ")
+        print()
+        
+        for row in range(GRID_HEIGHT):
+            print(f"Row{row}: ", end="")
+            for col in range(GRID_WIDTH):
+                center_x = GRID_OFFSET_X + col * TILE_SIZE + TILE_SIZE // 2
+                center_y = GRID_OFFSET_Y + row * TILE_SIZE + TILE_SIZE // 2
+                print(f"({center_x:3},{center_y:3})", end=" ")
+            print()
+        
+        print(f"\n💡 Example click commands:")
+        print(f"   First tile (top-left):    click {GRID_OFFSET_X + TILE_SIZE//2} {GRID_OFFSET_Y + TILE_SIZE//2}")
+        print(f"   Center tile:              click {GRID_OFFSET_X + 3*TILE_SIZE + TILE_SIZE//2} {GRID_OFFSET_Y + 2*TILE_SIZE + TILE_SIZE//2}")
+        print(f"   Last tile (bottom-right): click {GRID_OFFSET_X + 7*TILE_SIZE + TILE_SIZE//2} {GRID_OFFSET_Y + 5*TILE_SIZE + TILE_SIZE//2}")
+        print()
     
     def wait_for_gui(self, timeout=10):
         """Wait for the pygame window to be ready"""
@@ -238,20 +333,31 @@ class GameAutomation:
             if len(parts) >= 3:
                 try:
                     x, y = int(parts[1]), int(parts[2])
+                    print(f"\n🎯 PROCESSING CLICK COMMAND: '{command}'")
                     success = self.send_click_event(x, y)
                     if success:
+                        print(f"⏳ Waiting 0.5s for click action to complete...")
                         time.sleep(0.5)  # Wait for action to complete
-                        self.take_screenshot(f"click_{x}_{y}")
+                        screenshot_name = f"click_{x}_{y}"
+                        print(f"📸 Taking screenshot: {screenshot_name}")
+                        self.take_screenshot(screenshot_name)
+                        print(f"✅ Click command completed successfully\n")
+                    else:
+                        print(f"❌ Click command failed\n")
                 except ValueError:
-                    print(f"Invalid click coordinates: {command}")
+                    print(f"❌ Invalid click coordinates in command: {command}")
             else:
-                print(f"Invalid click command format: {command}")
+                print(f"❌ Invalid click command format: {command}")
+                print(f"   Expected: 'click <x> <y>', got: '{command}'")
         
         elif command == "screenshot":
             self.take_screenshot("manual")
         
         elif command == "wait":
             time.sleep(1)
+        
+        elif command == "grid" or command == "show-grid":
+            self.show_grid_layout()
             
         else:
             print(f"Unknown command: {command}")
