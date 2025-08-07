@@ -32,6 +32,7 @@ WORKDIR /app
 # Copy game files
 COPY game.py .
 COPY automation.py .
+COPY sprites/ ./sprites/
 
 # Set environment variables for display
 ENV DISPLAY=:99
