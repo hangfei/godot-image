@@ -172,32 +172,95 @@ class LinkAndMaxGame:
                 self.grid[y][x] = Gem(gem_type, x, y)
                 
     def load_game_state(self):
-        """Load game state from JSON file or create new game"""
-        json_files = [f for f in os.listdir('.') if f.endswith('.json') and f.startswith('save')]
+        """Load game state from ANY JSON file in directory or create new game"""
+        # Look for ANY .json file in the current directory
+        json_files = [f for f in os.listdir('.') if f.endswith('.json')]
         
         if json_files:
-            # Load the most recent save file
-            latest_file = max(json_files, key=lambda f: os.path.getmtime(f))
+            print(f"Found {len(json_files)} JSON file(s): {', '.join(json_files)}")
+            
+            # Try files in order of preference: save files first, then most recent
+            save_files = [f for f in json_files if f.startswith('save')]
+            if save_files:
+                # Prefer save files, pick most recent
+                latest_file = max(save_files, key=lambda f: os.path.getmtime(f))
+            else:
+                # No save files, pick most recent JSON file
+                latest_file = max(json_files, key=lambda f: os.path.getmtime(f))
+            
+            print(f"Attempting to load: {latest_file}")
+            
             try:
                 with open(latest_file, 'r') as f:
                     data = json.load(f)
+                    
+                    # Validate it's a game state file
+                    required_keys = ['grid']
+                    if not all(key in data for key in required_keys):
+                        print(f"⚠️  {latest_file} doesn't appear to be a game state file (missing required keys)")
+                        print(f"   Required: {required_keys}, Found: {list(data.keys())}")
+                        raise ValueError("Invalid game state format")
+                    
+                    # Load game state data
                     self.score = data.get('score', 0)
                     self.moves = data.get('moves', 0)
                     self.cursor_x = data.get('cursor_x', 0)
                     self.cursor_y = data.get('cursor_y', 0)
                     
+                    # Validate cursor position
+                    self.cursor_x = max(0, min(self.cursor_x, GRID_WIDTH - 1))
+                    self.cursor_y = max(0, min(self.cursor_y, GRID_HEIGHT - 1))
+                    
                     # Reconstruct grid
                     self.create_empty_grid()
                     grid_data = data.get('grid', [])
-                    for y in range(min(len(grid_data), GRID_HEIGHT)):
-                        for x in range(min(len(grid_data[y]), GRID_WIDTH)):
-                            if grid_data[y][x] is not None:
-                                gem_type = GemType(grid_data[y][x])
-                                self.grid[y][x] = Gem(gem_type, x, y)
-                print(f"Loaded game from {latest_file}")
+                    
+                    if not grid_data:
+                        print("⚠️  Grid data is empty, creating random grid")
+                        self.fill_grid_randomly()
+                    else:
+                        for y in range(min(len(grid_data), GRID_HEIGHT)):
+                            row = grid_data[y]
+                            if isinstance(row, list):
+                                for x in range(min(len(row), GRID_WIDTH)):
+                                    if row[x] is not None:
+                                        try:
+                                            gem_type = GemType(row[x])
+                                            self.grid[y][x] = Gem(gem_type, x, y)
+                                        except ValueError:
+                                            print(f"⚠️  Invalid gem type {row[x]} at ({x}, {y}), skipping")
+                        
+                        # Fill any empty spots that might exist
+                        for y in range(GRID_HEIGHT):
+                            for x in range(GRID_WIDTH):
+                                if self.grid[y][x] is None:
+                                    gem_type = random.choice(list(GemType))
+                                    self.grid[y][x] = Gem(gem_type, x, y)
+                    
+                print(f"✅ Successfully loaded game from {latest_file}")
+                print(f"   Score: {self.score}, Moves: {self.moves}, Cursor: ({self.cursor_x}, {self.cursor_y})")
                 return
-            except (json.JSONDecodeError, KeyError, ValueError) as e:
-                print(f"Error loading save file: {e}")
+                
+            except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+                print(f"❌ Error loading {latest_file}: {e}")
+                print(f"   Trying other JSON files...")
+                
+                # Try other JSON files if the first one failed
+                for file in json_files:
+                    if file != latest_file:
+                        try:
+                            print(f"   Trying {file}...")
+                            with open(file, 'r') as f:
+                                data = json.load(f)
+                                if 'grid' in data:
+                                    print(f"   ✅ {file} looks valid, using it instead")
+                                    # Recursively call but with this file as the "latest"
+                                    os.utime(file)  # Touch file to make it most recent
+                                    return self.load_game_state()
+                        except Exception:
+                            continue
+                            
+                print("❌ No valid game state files found, creating new game")
         
         # Create new game if no save file or error loading
         self.create_empty_grid()
@@ -232,6 +295,35 @@ class LinkAndMaxGame:
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
         print(f"Game saved to {filename}")
+        
+    def auto_save_game_state(self):
+        """Auto-save current game state to JSON (silent)"""
+        # Convert grid to serializable format
+        grid_data = []
+        for y in range(GRID_HEIGHT):
+            row = []
+            for x in range(GRID_WIDTH):
+                gem = self.grid[y][x]
+                if gem is not None:
+                    row.append(gem.type.value)
+                else:
+                    row.append(None)
+            grid_data.append(row)
+            
+        data = {
+            'score': self.score,
+            'moves': self.moves,
+            'cursor_x': self.cursor_x,
+            'cursor_y': self.cursor_y,
+            'grid': grid_data,
+            'timestamp': pygame.time.get_ticks(),
+            'auto_saved': True
+        }
+        
+        # Use a consistent auto-save filename that gets overwritten
+        filename = "auto_save_current.json"
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=2)
         
     def get_adjacent_positions(self, x: int, y: int) -> List[Tuple[int, int]]:
         """Get valid adjacent positions"""
@@ -309,6 +401,9 @@ class LinkAndMaxGame:
         
         self.linked_gems = []
         
+        # Auto-save after clearing gems (major game state change)
+        self.auto_save_game_state()
+        
     def apply_gravity(self):
         """Make gems fall down"""
         for x in range(GRID_WIDTH):
@@ -336,21 +431,28 @@ class LinkAndMaxGame:
     def handle_input(self, event):
         """Handle keyboard input"""
         if event.type == pygame.KEYDOWN:
+            action_taken = False  # Track if we need to auto-save
+            
             if event.key == pygame.K_w and self.cursor_y > 0:
                 self.cursor_y -= 1
                 self.moves += 1
+                action_taken = True
             elif event.key == pygame.K_s and self.cursor_y < GRID_HEIGHT - 1:
                 self.cursor_y += 1
                 self.moves += 1
+                action_taken = True
             elif event.key == pygame.K_a and self.cursor_x > 0:
                 self.cursor_x -= 1
                 self.moves += 1
+                action_taken = True
             elif event.key == pygame.K_d and self.cursor_x < GRID_WIDTH - 1:
                 self.cursor_x += 1
                 self.moves += 1
+                action_taken = True
             elif event.key == pygame.K_SPACE:
                 self.handle_selection()
                 self.moves += 1
+                action_taken = True
             elif event.key == pygame.K_r:
                 # Reset game
                 self.create_empty_grid()
@@ -365,8 +467,9 @@ class LinkAndMaxGame:
                 self.preview_gems = []
                 self.selection_mode = False
                 self.clear_all_selections()
+                action_taken = True
             elif event.key == pygame.K_F1:
-                # Save game
+                # Manual save game
                 self.save_game_state()
                 
             # Clear selection mode when moving cursor
@@ -378,6 +481,10 @@ class LinkAndMaxGame:
                 self.multiplier = 1
             elif event.key == pygame.K_SPACE:
                 self.multiplier = 1
+                
+            # Auto-save after any action that changes game state
+            if action_taken:
+                self.auto_save_game_state()
                 
     def handle_selection(self):
         """Handle gem selection and linking"""
@@ -489,7 +596,7 @@ class LinkAndMaxGame:
             "WASD: Move cursor",
             "SPACE: Select gems, SPACE again: Clear",
             "R: Reset game",
-            "F1: Save game"
+            "F1: Manual save (auto-saves every action)"
         ]
         
         for i, control in enumerate(controls):
