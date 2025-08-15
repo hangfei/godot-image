@@ -149,6 +149,7 @@ class LinkAndMaxGame:
         self.preview_gems: List[Tuple[int, int]] = []  # Gems that would be cleared
         self.selection_mode = False  # Whether we're in selection preview mode
         self.invalid_selection_timer = 0  # Timer for showing invalid selection feedback
+        self.step_counter = 0  # Counter for sequential auto-save files
         self.score = 0
         self.moves = 0
         self.multiplier = 1
@@ -206,6 +207,7 @@ class LinkAndMaxGame:
                     self.moves = data.get('moves', 0)
                     self.cursor_x = data.get('cursor_x', 0)
                     self.cursor_y = data.get('cursor_y', 0)
+                    self.step_counter = data.get('step', 0)  # Load step counter if available
                     
                     # Validate cursor position
                     self.cursor_x = max(0, min(self.cursor_x, GRID_WIDTH - 1))
@@ -297,7 +299,10 @@ class LinkAndMaxGame:
         print(f"Game saved to {filename}")
         
     def auto_save_game_state(self):
-        """Auto-save current game state to JSON (silent)"""
+        """Auto-save current game state to JSON with sequential numbering"""
+        # Increment step counter
+        self.step_counter += 1
+        
         # Convert grid to serializable format
         grid_data = []
         for y in range(GRID_HEIGHT):
@@ -317,13 +322,16 @@ class LinkAndMaxGame:
             'cursor_y': self.cursor_y,
             'grid': grid_data,
             'timestamp': pygame.time.get_ticks(),
+            'step': self.step_counter,
             'auto_saved': True
         }
         
-        # Use a consistent auto-save filename that gets overwritten
-        filename = "auto_save_current.json"
+        # Create sequential numbered filename
+        filename = f"game_state_step_{self.step_counter}.json"
         with open(filename, 'w') as f:
             json.dump(data, f, indent=2)
+        
+        print(f"Auto-saved: {filename} (Score: {self.score}, Moves: {self.moves})")
         
     def get_adjacent_positions(self, x: int, y: int) -> List[Tuple[int, int]]:
         """Get valid adjacent positions"""
@@ -467,6 +475,7 @@ class LinkAndMaxGame:
                 self.preview_gems = []
                 self.selection_mode = False
                 self.clear_all_selections()
+                self.step_counter = 0  # Reset step counter on new game
                 action_taken = True
             elif event.key == pygame.K_F1:
                 # Manual save game
