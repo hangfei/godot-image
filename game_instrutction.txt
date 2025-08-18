@@ -1,147 +1,35 @@
-MUSEUM HEIST - Stealth Puzzler Game Instructions
-==============================================
+===============================================================================
+                          NEON LIGHT ROUTER - QUICK GUIDE
+===============================================================================
 
 🎯 OBJECTIVE
-Your mission: Infiltrate the museum and steal all the priceless artworks without being caught by the guards. Plan your route carefully, stay in the shadows, and escape with the greatest art collection in history!
+Route light beams to crystal wells using mirrors, prisms, and splitters.
 
 🎮 CONTROLS
-- W, A, S, D: Move your character tile-by-tile through the museum
-- SPACE: Steal artwork when next to it (within 1 tile)
-- ESC: Quit the game
+  W/A/S/D  - Move cursor
+  SPACE    - Place/rotate optics (Empty → Mirror → Prism → Splitter → Empty)
+  R        - New puzzle
 
-🕵️ GAME MECHANICS
+📋 GAME ELEMENTS
 
-Turn-Based Movement:
-- The game only advances when YOU move or take an action
-- Guards patrol and cameras rotate ONLY after you make a move
-- Take your time to plan each step - there's no time pressure!
+🔹 BEAM SOURCES (Blue circles) - Emit colored light from grid edges
+🔹 MIRRORS (Cyan lines) - Reflect light at 90° angles  
+🔹 PRISMS (Magenta triangles) - Split white light into red/green/blue
+🔹 SPLITTERS (Green crosses) - Split beams in perpendicular directions
+🔹 CRYSTAL WELLS (Pink diamonds) - Your targets!
 
-Stealth System:
-- Guards have cone-shaped vision areas (shown as light regions)
-- If you step into a guard's line of sight, you'll be caught instantly
-- Stay in the dark areas to remain hidden
-- Each turn you stay hidden increases your stealth streak
+🏆 SCORING
+• 100 points per well hit
+• -2 points per step taken
+• Score = (Wells × 100) - (Steps × 2)
 
-Scoring System:
-- Base Score = Artwork Value × Stealth Bonus Multiplier
-- Stealth Bonus grows with your stealth streak: 1.0x + (streak × 0.1x)
-- Example: 10-step stealth streak = 2.0x multiplier
-- Bonus resets to 1.0x if you're spotted by a guard
+💡 TIPS
+• Study beam source positions first
+• Use fewer steps for higher scores
+• Prisms split white light into colors
+• Splitters multiply beams to hit multiple targets
 
-🏛️ MUSEUM LAYOUT
+💾 AUTO-SAVE
+Game saves after each move as game_state_step_X.json files.
 
-Visual Elements:
-- Dark Blue Tiles: Museum floors (safe to walk on)
-- Dark Gray Tiles: Walls (impassable)
-- Light Areas: Guard vision cones (DANGEROUS - avoid these!)
-- Golden Rectangles: Valuable artworks to steal
-- Green Circle (P): Your character
-- Red/Brown Circles (G): Museum guards
-
-Famous Artworks to Steal:
-- Mona Lisa (1000 points)
-- Starry Night (800 points)
-- Venus de Milo (700 points)
-- The Scream (600 points)
-- The Thinker (500 points)
-
-🛡️ GUARD BEHAVIOR
-
-Patrol Patterns:
-- Each guard follows a predetermined route
-- They move to the next waypoint after you move
-- Guards face the direction they're moving
-- Vision cones project forward from their facing direction
-- Alert guards (shown in red) mean you've been spotted!
-
-Vision System:
-- Guards can only see in front of them (directional vision)
-- Vision range: 3-5 tiles depending on the guard
-- Line of sight is blocked by walls
-- If ANY guard sees you, the heist fails immediately
-
-🏆 WINNING & LOSING
-
-Victory Conditions:
-- Steal ALL artworks in the museum
-- Complete the heist without being detected
-- Final score = total artwork value × accumulated stealth bonuses
-
-Defeat Conditions:
-- Any guard spots you in their vision cone
-- Game ends immediately with "CAUGHT!" message
-
-💾 SAVE SYSTEM
-
-Automatic State Saving:
-- Every action saves the game state to JSON files
-- Files named: game_state_step_1.json, game_state_step_2.json, etc.
-- Game automatically loads the most recent save when restarted
-- You can examine save files to analyze your progress
-
-🎯 STRATEGY TIPS
-
-Planning Your Route:
-1. Study guard patrol patterns before moving
-2. Wait for guards to move away from your target area
-3. Plan an escape route before approaching artwork
-4. Use walls to break line of sight
-
-Maximizing Score:
-- Build long stealth streaks for maximum multiplier
-- Save high-value artworks for when you have big bonuses
-- Never enter guard vision - even briefly ruins your streak
-
-Advanced Techniques:
-- Follow guards from behind (outside their vision cone)
-- Use the turn-based nature to "pause" and analyze situations
-- Guards are predictable - learn their routes
-- Corner cutting: Guards can't see around walls
-
-🔧 TECHNICAL NOTES
-
-Random Generation:
-- Run 'python game_state_generator.py' to create new random museum layouts
-- Each game features different guard positions, patrol routes, and artwork locations
-- Seed value ensures reproducible random layouts
-
-System Requirements:
-- Python 3.x
-- Pygame library
-- Works on Windows, Mac, and Linux
-
-File Structure:
-- game.py: Main game file
-- game_state_generator.py: Random level generator  
-- game_state_step_X.json: Save files
-- game_instruction.txt: This instruction file
-
-🎨 IMMERSION
-
-Noir Atmosphere:
-The game features a "noir" art style with:
-- Dark, moody color palette
-- Isometric perspective for strategic overview
-- Atmospheric lighting from guard vision cones
-- Reflective museum floors
-- Classic heist movie aesthetics
-
-Art Collection Theme:
-Steal famous masterpieces including works by:
-- Leonardo da Vinci (Mona Lisa)
-- Vincent van Gogh (Starry Night)  
-- Edvard Munch (The Scream)
-- Auguste Rodin (The Thinker)
-- And more classical sculptures and paintings
-
-🏁 GETTING STARTED
-
-1. Run 'python game.py' to start playing
-2. Use WASD to move your character (green P)
-3. Avoid the light areas (guard vision cones)
-4. Press SPACE when next to golden artwork to steal it
-5. Steal all artwork to win the heist!
-
-Good luck, master thief! The greatest art collection in history awaits...
-
-Remember: In the shadows lies victory, in the light lies capture.
+===============================================================================
