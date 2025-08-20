@@ -1,35 +1,38 @@
-===============================================================================
-                          NEON LIGHT ROUTER - QUICK GUIDE
-===============================================================================
+CLOCKWORK CRYPTS - Game Instructions
 
-🎯 OBJECTIVE
-Route light beams to crystal wells using mirrors, prisms, and splitters.
+OBJECTIVE:
+Navigate through clockwork-powered puzzle dungeons, collecting treasures and reaching the exit before time runs out. Plan your moves carefully - every 6th action triggers all gears to rotate!
 
-🎮 CONTROLS
-  W/A/S/D  - Move cursor
-  SPACE    - Place/rotate optics (Empty → Mirror → Prism → Splitter → Empty)
-  R        - New puzzle
+CONTROLS:
+- W/A/S/D: Move up/left/down/right (counts as action)
+- SPACE: Operate adjacent lever OR wait (counts as action)
 
-📋 GAME ELEMENTS
+CORE MECHANICS:
+1. TURN-BASED: Game only advances when you press a key
+2. GEAR SYSTEM: Every 6 actions, all gears rotate one notch clockwise
+3. DOORS: Open/close based on connected gear phases
+4. LEVERS: Manually advance specific gears when operated
+5. TREASURES: Collect for points and key fragments
+6. EXIT: Reach to complete the level
 
-🔹 BEAM SOURCES (Blue circles) - Emit colored light from grid edges
-🔹 MIRRORS (Cyan lines) - Reflect light at 90° angles  
-🔹 PRISMS (Magenta triangles) - Split white light into red/green/blue
-🔹 SPLITTERS (Green crosses) - Split beams in perpendicular directions
-🔹 CRYSTAL WELLS (Pink diamonds) - Your targets!
+SCORING:
+- Base points for treasure collection
+- Bonus points for completing levels quickly
+- Key fragments unlock cosmetic gear skins
+- Move streak tracks efficiency
 
-🏆 SCORING
-• 100 points per well hit
-• -2 points per step taken
-• Score = (Wells × 100) - (Steps × 2)
+VISUAL ELEMENTS:
+- Brass gears show current rotation phase
+- Green doors are open, red doors are closed
+- Gold/bronze levers show activation state
+- Grid lines help plan movement
+- Vignette effect on gear ticks for dramatic emphasis
 
-💡 TIPS
-• Study beam source positions first
-• Use fewer steps for higher scores
-• Prisms split white light into colors
-• Splitters multiply beams to hit multiple targets
+STRATEGY TIPS:
+- Count your actions (displayed in UI)
+- Plan 6 moves ahead for gear rotations
+- Use levers to manually adjust timing
+- Collect all treasures for maximum score
+- Minimize moves for streak bonuses
 
-💾 AUTO-SAVE
-Game saves after each move as game_state_step_X.json files.
-
-===============================================================================
+The game auto-saves after every action to game_state_step_X.json files.
