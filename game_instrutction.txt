@@ -1,38 +1,67 @@
-CLOCKWORK CRYPTS - Game Instructions
+STARLIGHT COURIER - Game Instructions
 
 OBJECTIVE:
-Navigate through clockwork-powered puzzle dungeons, collecting treasures and reaching the exit before time runs out. Plan your moves carefully - every 6th action triggers all gears to rotate!
+Deliver starlit parcels to beacons while avoiding detection by sentry drones. Complete all deliveries to win!
 
 CONTROLS:
-- W/A/S/D: Move up/left/down/right (counts as action)
-- SPACE: Operate adjacent lever OR wait (counts as action)
+- WASD: Move your character (turn-based)
+- SPACE: Interact (pick up/drop parcels, use telepads, toggle stealth)
+- R: Reset game to new random state
+- ESC: Quit game
 
-CORE MECHANICS:
-1. TURN-BASED: Game only advances when you press a key
-2. GEAR SYSTEM: Every 6 actions, all gears rotate one notch clockwise
-3. DOORS: Open/close based on connected gear phases
-4. LEVERS: Manually advance specific gears when operated
-5. TREASURES: Collect for points and key fragments
-6. EXIT: Reach to complete the level
+GAMEPLAY MECHANICS:
+
+1. TURN-BASED MOVEMENT:
+   - Game only advances when you press a key
+   - Each move triggers drone responses
+   - Plan your moves carefully!
+
+2. SENTRY DRONES:
+   - Red circles with direction indicators
+   - Mirror your PREVIOUS move pattern
+   - Red vision cones show detection areas
+   - Avoid being seen or game over after 3 detections
+
+3. PARCELS & DELIVERY:
+   - Cyan shapes scattered around the grid
+   - Different shapes: Circle (normal), Square (heavy), Triangle (fragile)
+   - Pick up with SPACE when standing on them
+   - Deliver to matching beacon types for maximum points
+
+4. BEACONS:
+   - Golden glowing circles
+   - Letter indicates required parcel type (N=normal, H=heavy, F=fragile)
+   - Stand on beacon with correct parcel and press SPACE to deliver
+
+5. STEALTH SYSTEM:
+   - Stand on cover spots (gray obstacles) and press SPACE to hide
+   - Green dot indicates stealth mode active
+   - Hidden players won't be detected by drones
+   - Stealth bonus: +50 points per delivery with zero detections
+
+6. TELEPADS:
+   - Purple pulsing circles
+   - Press SPACE to teleport between paired telepads
+   - Limited charges shown as numbers
+   - Strategic escape routes!
 
 SCORING:
-- Base points for treasure collection
-- Bonus points for completing levels quickly
-- Key fragments unlock cosmetic gear skins
-- Move streak tracks efficiency
+- Base points from parcel value
+- Type multipliers for special parcels
+- Stealth bonuses for perfect runs
+- Track deliveries and total score
 
-VISUAL ELEMENTS:
-- Brass gears show current rotation phase
-- Green doors are open, red doors are closed
-- Gold/bronze levers show activation state
-- Grid lines help plan movement
-- Vignette effect on gear ticks for dramatic emphasis
+GRID COORDINATES:
+- Each cell shows X,Y coordinates
+- Use coordinates to plan movements from screenshots
+- Grid is 16x12 (width x height)
 
-STRATEGY TIPS:
-- Count your actions (displayed in UI)
-- Plan 6 moves ahead for gear rotations
-- Use levers to manually adjust timing
-- Collect all treasures for maximum score
-- Minimize moves for streak bonuses
+GAME STATE:
+- Auto-saves after each action as game_state_step_X.json
+- Loads most recent save on startup
+- Can resume from any saved state
 
-The game auto-saves after every action to game_state_step_X.json files.
+WIN CONDITION:
+Deliver all parcels to their matching beacons without being caught!
+
+TIP: Study drone patterns, use cover strategically, and plan efficient routes!
