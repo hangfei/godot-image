@@ -33,7 +33,7 @@ WORKDIR /app
 COPY game.py .
 COPY automation.py .
 # COPY sprites/ ./sprites/
-COPY game/sprites/ ./sprites/
+# COPY game/sprites/ ./sprites/
 
 # Set environment variables for display
 ENV DISPLAY=:99
